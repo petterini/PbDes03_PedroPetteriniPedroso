@@ -45,8 +45,8 @@ public class EventController {
         try {
             var e = this.eventService.updateEvent(id, event);
             return ResponseEntity.ok(e);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Exception ex) {
+            ex.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
