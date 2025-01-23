@@ -6,8 +6,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
-@Getter @Setter @ToString @EqualsAndHashCode
 @AllArgsConstructor @NoArgsConstructor
+@Data
 @Document
 public class Event {
 
@@ -18,6 +18,6 @@ public class Event {
     private String cep;
     private String logradouro;
     private String bairro;
-    private String cidade;
+    private String localidade;
     private String uf;
 }

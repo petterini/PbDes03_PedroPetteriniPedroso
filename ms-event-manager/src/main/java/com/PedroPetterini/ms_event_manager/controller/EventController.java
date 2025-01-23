@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("eventManagement/v1")
+@RestController
+@RequestMapping(("eventManagement/v1"))
 public class EventController {
 
     private final EventService eventService;
+
     public EventController(EventService eventService) {
         this.eventService = eventService;
     }
@@ -51,7 +53,7 @@ public class EventController {
         }
     }
 
-    @DeleteMapping
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(@PathVariable String id) {
         this.eventService.deleteEvent(id);
         return ResponseEntity.noContent().build();
