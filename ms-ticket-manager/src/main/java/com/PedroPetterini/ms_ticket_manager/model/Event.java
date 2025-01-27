@@ -11,8 +11,6 @@ import java.time.LocalDateTime;
 @AllArgsConstructor @NoArgsConstructor
 @Data
 public class Event {
-
-    @Id
     private String id;
     private String eventName;
     private LocalDateTime dateTime;

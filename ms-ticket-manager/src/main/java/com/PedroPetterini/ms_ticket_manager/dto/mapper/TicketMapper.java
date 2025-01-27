@@ -23,7 +23,6 @@ public class TicketMapper {
     }
 
     public TicketResponseDto toDto(Ticket ticket) {
-
         TicketResponseDto dto = modelMapper.map(ticket, TicketResponseDto.class);
         return dto;
     }
