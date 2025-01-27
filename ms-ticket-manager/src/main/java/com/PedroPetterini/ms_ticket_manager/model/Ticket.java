@@ -20,4 +20,5 @@ public class Ticket {
     private String eventName;
     private Double brlAmount;
     private Double usdAmount;
+    private Boolean active = true;
 }

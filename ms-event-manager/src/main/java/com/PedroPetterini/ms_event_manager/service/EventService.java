@@ -45,16 +45,18 @@ public class EventService {
     }
 
     public Event updateEvent(String id, Event event) {
-        Event e = eventRepository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
-        var newEvent = addCepData(event);
-        newEvent.setEventName(event.getEventName());
-        newEvent.setDateTime(event.getDateTime());
-        updateData(e, newEvent);
-        return eventRepository.save(newEvent);
+        Event e = eventRepository.findById(id).orElse(null);
+        e = addCepData(event);
+        e.setEventName(event.getEventName());
+        e.setDateTime(event.getDateTime());
+        e.setId(event.getId());
+        System.out.println(e);
+        System.out.println(event);
+        return eventRepository.save(e);
     }
 
     public void updateData(Event e, Event event) {
-        BeanUtils.copyProperties(event, e, "id");
+
     }
 
     public void deleteEvent(String id) {

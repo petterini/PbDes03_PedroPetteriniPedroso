@@ -6,10 +6,9 @@ import com.PedroPetterini.ms_ticket_manager.service.EventService;
 import com.PedroPetterini.ms_ticket_manager.service.TicketService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("ticketManagement/v1")
@@ -28,5 +27,26 @@ public class TicketController {
         ticketService.createTicket(ticket);
         TicketResponseDto ticketResponseDto = eventService.toDto(ticket);
         return ResponseEntity.status(HttpStatus.CREATED).body(ticketResponseDto);
+    }
+
+    @GetMapping("/get-all-tickets")
+    public ResponseEntity<List<TicketResponseDto>> getAllTickets() {
+        return ResponseEntity.ok(ticketService.getAllTickets());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<TicketResponseDto> getTicketById(@PathVariable("id") String id) {
+        return ResponseEntity.ok(ticketService.getTicketById(id));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTicketById(@PathVariable("id") String id) {
+        ticketService.softDeleteTicketById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TicketResponseDto> updateTicketById(@PathVariable("id") String id, @RequestBody Ticket ticket) {
+        return ResponseEntity.ok(ticketService.updateTicket(id, ticket));
     }
 }
