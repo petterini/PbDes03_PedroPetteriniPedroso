@@ -49,4 +49,9 @@ public class TicketController {
     public ResponseEntity<TicketResponseDto> updateTicketById(@PathVariable("id") String id, @RequestBody Ticket ticket) {
         return ResponseEntity.ok(ticketService.updateTicket(id, ticket));
     }
+
+    @GetMapping("/check-tickets-by-event/{eventId}")
+    public ResponseEntity<List<TicketResponseDto>> checkTicketsByEvent(@PathVariable("eventId") String eventId) {
+        return ResponseEntity.ok(ticketService.findByEventId(eventId));
+    }
 }
