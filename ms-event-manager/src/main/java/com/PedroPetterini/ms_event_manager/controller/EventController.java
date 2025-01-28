@@ -1,7 +1,14 @@
 package com.PedroPetterini.ms_event_manager.controller;
 
+import com.PedroPetterini.ms_event_manager.dto.ErrorResponseDto;
+import com.PedroPetterini.ms_event_manager.dto.EventDto;
+import com.PedroPetterini.ms_event_manager.exception.DuplicateEventException;
+import com.PedroPetterini.ms_event_manager.exception.EventNotFoundException;
+import com.PedroPetterini.ms_event_manager.exception.UnauthorizedException;
 import com.PedroPetterini.ms_event_manager.model.Event;
 import com.PedroPetterini.ms_event_manager.service.EventService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,14 +16,11 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
+@RequiredArgsConstructor
 @RequestMapping(("eventManagement/v1"))
 public class EventController {
 
     private final EventService eventService;
-
-    public EventController(EventService eventService) {
-        this.eventService = eventService;
-    }
 
     @GetMapping("/get-all-events")
     public ResponseEntity<List<Event>> getAllEvents() {
@@ -31,32 +35,53 @@ public class EventController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Event> getEventById(@PathVariable String id) {
-        Event event = this.eventService.getEventById(id);
-        return ResponseEntity.ok(event);
+    public ResponseEntity<Object> getEventById(@PathVariable String id) {
+        try {
+            Event event = this.eventService.getEventById(id);
+            return ResponseEntity.ok(event);
+        } catch (EventNotFoundException e) {
+            var errorMessage = ErrorResponseDto.eventNotFoundResponse(e.getMessage());
+            return ResponseEntity.status(errorMessage.status()).body(errorMessage);
+        }
     }
 
     @PostMapping
-    public ResponseEntity<Event> addEvent(@RequestBody Event event) {
-        var newEvent = this.eventService.addEvent(event);
-        return ResponseEntity.status(HttpStatus.CREATED).body(newEvent);
+    public ResponseEntity<Object> addEvent(@Valid @RequestBody EventDto eventDto) {
+        try {
+            var newEvent = this.eventService.addEvent(eventDto);
+            return ResponseEntity.status(HttpStatus.CREATED).body(newEvent);
+        } catch (DuplicateEventException e) {
+            var errorMessage = ErrorResponseDto.conflictResponse(e.getMessage());
+            return ResponseEntity.status(errorMessage.status()).body(errorMessage);
+        }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Event> updateEvent(@PathVariable String id, @RequestBody Event event) {
+    public ResponseEntity<Object> updateEvent(@PathVariable String id, @Valid @RequestBody EventDto eventDto) {
         try {
-            var e = this.eventService.updateEvent(id, event);
+            var e = this.eventService.updateEvent(id, eventDto);
             return ResponseEntity.ok(e);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        } catch (DuplicateEventException e) {
+            var errorMessage = ErrorResponseDto.conflictResponse(e.getMessage());
+            return ResponseEntity.status(errorMessage.status()).body(errorMessage);
+        } catch (EventNotFoundException e) {
+            var errorMessage = ErrorResponseDto.eventNotFoundResponse(e.getMessage());
+            return ResponseEntity.status(errorMessage.status()).body(errorMessage);
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteEvent(@PathVariable String id) {
-        this.eventService.deleteEvent(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<Object> deleteEvent(@PathVariable String id) {
+        try {
+            this.eventService.deleteEvent(id);
+            return ResponseEntity.noContent().build();
+        } catch (UnauthorizedException e) {
+            var errorMessage = ErrorResponseDto.unauthorizedResponse(e.getMessage());
+            return ResponseEntity.status(errorMessage.status()).body(errorMessage);
+        } catch (EventNotFoundException e) {
+            var errorMessage = ErrorResponseDto.eventNotFoundResponse(e.getMessage());
+            return ResponseEntity.status(errorMessage.status()).body(errorMessage);
+        }
     }
 
 }

@@ -52,6 +52,9 @@ public class TicketController {
 
     @GetMapping("/check-tickets-by-event/{eventId}")
     public ResponseEntity<List<TicketResponseDto>> checkTicketsByEvent(@PathVariable("eventId") String eventId) {
+        if(ticketService.findByEventId(eventId) == null) {
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
         return ResponseEntity.ok(ticketService.findByEventId(eventId));
     }
 }

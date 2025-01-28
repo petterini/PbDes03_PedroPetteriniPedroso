@@ -66,6 +66,7 @@ public class TicketService {
             Ticket ticketToUpdate = ticketRepository.findById(id).orElse(null);
             updateData(ticketToUpdate, ticket);
             ticketRepository.save(ticketToUpdate);
+            sendMailTicketAlteration(ticket);
             return eventService.toDto(ticketToUpdate);
         } catch (Exception e) {
             e.printStackTrace();
@@ -89,5 +90,14 @@ public class TicketService {
         email.setSubject("Ticket Confirmation from: " + ticket.getEventName());
         email.setBody("Hello, " + ticket.getCustomerName() + ", ticket Confirmation from: " + ticket.getEventName());
         emailService.sendEmail(email);
+    }
+
+    private void sendMailTicketAlteration(Ticket ticket) {
+        Email email = new Email();
+        email.setEmailTo(ticket.getCustomerMail());
+        email.setSubject("Ticket Alteration from: " + ticket.getEventName());
+        email.setBody("Hello, " + ticket.getCustomerName() + ", ticket alteration from: " + ticket.getEventName());
+        emailService.sendEmail(email);
+
     }
 }
