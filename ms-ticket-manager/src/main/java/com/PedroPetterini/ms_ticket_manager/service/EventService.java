@@ -5,21 +5,18 @@ import com.PedroPetterini.ms_ticket_manager.dto.TicketResponseDto;
 import com.PedroPetterini.ms_ticket_manager.dto.mapper.TicketMapper;
 import com.PedroPetterini.ms_ticket_manager.model.Event;
 import com.PedroPetterini.ms_ticket_manager.model.Ticket;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class EventService {
 
     private final TicketMapper ticketMapper;
     private final EventConsumer eventConsumer;
-
-    public EventService(TicketMapper ticketMapper, EventConsumer eventConsumer) {
-        this.ticketMapper = ticketMapper;
-        this.eventConsumer = eventConsumer;
-    }
 
     public TicketResponseDto toDto(Ticket ticket) {
         Event event = eventConsumer.getEvent(ticket.getEventId());

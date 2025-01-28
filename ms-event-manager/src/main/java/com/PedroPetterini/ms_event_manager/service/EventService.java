@@ -76,11 +76,9 @@ public class EventService {
 
     public void deleteEvent(String id) {
         if (eventRepository.existsById(id)) {
-            if (ticketConsumer.getEventResponse(id).status() == HttpStatus.NO_CONTENT.value())
+            if (ticketConsumer.getEventResponse(id).status() == HttpStatus.NOT_FOUND.value())
                 eventRepository.deleteById(id);
             else {
-                System.out.println(ticketConsumer.getEventResponse(id).status());
-                System.out.println(HttpStatus.NO_CONTENT.value());
                 throw new UnauthorizedException("Impossible to delete an event that already has tickets.");
             }
         }else{

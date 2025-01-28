@@ -4,27 +4,25 @@ import com.PedroPetterini.ms_ticket_manager.consumer.EmailConsumer;
 import com.PedroPetterini.ms_ticket_manager.consumer.EventConsumer;
 import com.PedroPetterini.ms_ticket_manager.dto.TicketResponseDto;
 import com.PedroPetterini.ms_ticket_manager.dto.mapper.TicketMapper;
+import com.PedroPetterini.ms_ticket_manager.exception.EventNotFoundException;
+import com.PedroPetterini.ms_ticket_manager.exception.TicketNotFoundException;
 import com.PedroPetterini.ms_ticket_manager.model.Email;
 import com.PedroPetterini.ms_ticket_manager.model.Ticket;
 import com.PedroPetterini.ms_ticket_manager.repository.TicketRepository;
 import feign.Response;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class TicketService {
     private final TicketRepository ticketRepository;
     private final EventConsumer eventConsumer;
     private final EventService eventService;
     private final EmailService emailService;
 
-    public TicketService(TicketRepository ticketRepository, EventConsumer eventConsumer, EventService eventService, EmailService emailService) {
-        this.ticketRepository = ticketRepository;
-        this.eventConsumer = eventConsumer;
-        this.eventService = eventService;
-        this.emailService = emailService;
-    }
 
     public Ticket createTicket(Ticket ticket) {
         Response response = eventConsumer.getEventResponse(ticket.getEventId());
@@ -32,7 +30,7 @@ public class TicketService {
             sendMailTicketConfirmation(ticket);
             return ticketRepository.save(ticket);
         } else {
-            throw new RuntimeException("Error creating ticket");
+            throw new EventNotFoundException("Error creating ticket, event not found");
         }
     }
 
@@ -43,14 +41,20 @@ public class TicketService {
     }
 
     public TicketResponseDto getTicketById(String ticketId) {
-        Ticket ticket = ticketRepository.findById(ticketId).orElse(null);
-        return eventService.toDto(ticket);
+        if (ticketRepository.existsById(ticketId)) {
+            return eventService.toDto(ticketRepository.findById(ticketId).get());
+        }
+        throw new TicketNotFoundException("Ticket not found");
     }
 
     public void softDeleteTicketById(String ticketId) {
-        Ticket ticket = ticketRepository.findById(ticketId).orElse(null);
-        ticket.setActive(false);
-        ticketRepository.save(ticket);
+        if (ticketRepository.existsById(ticketId)) {
+            Ticket ticket = ticketRepository.findById(ticketId).orElse(null);
+            ticket.setActive(false);
+            ticketRepository.save(ticket);
+        }else {
+            throw new TicketNotFoundException("Ticket not found");
+        }
     }
 
     public List<TicketResponseDto> findByEventId(String eventId) {
@@ -58,20 +62,18 @@ public class TicketService {
         if (!tickets.isEmpty()) {
             return eventService.toDto(tickets);
         }
-        return null;
+        throw new TicketNotFoundException("Ticket not found");
     }
 
     public TicketResponseDto updateTicket(String id, Ticket ticket) {
-        try {
-            Ticket ticketToUpdate = ticketRepository.findById(id).orElse(null);
+        if(ticketRepository.existsById(id)) {
+            Ticket ticketToUpdate = ticketRepository.findById(id).get();
             updateData(ticketToUpdate, ticket);
             ticketRepository.save(ticketToUpdate);
             sendMailTicketAlteration(ticket);
             return eventService.toDto(ticketToUpdate);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
         }
+        throw new TicketNotFoundException("Ticket not found");
     }
 
     private void updateData(Ticket ticketToUpdate, Ticket ticket) {
