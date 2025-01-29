@@ -62,7 +62,7 @@ public class TicketService {
         if (!tickets.isEmpty()) {
             return eventService.toDto(tickets);
         }
-        throw new TicketNotFoundException("Ticket not found");
+        throw new TicketNotFoundException("Ticket not found for this event");
     }
 
     public TicketResponseDto updateTicket(String id, Ticket ticket) {

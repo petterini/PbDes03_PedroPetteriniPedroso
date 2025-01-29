@@ -3,9 +3,11 @@ package com.PedroPetterini.ms_ticket_manager.service;
 import com.PedroPetterini.ms_ticket_manager.consumer.EventConsumer;
 import com.PedroPetterini.ms_ticket_manager.dto.TicketResponseDto;
 import com.PedroPetterini.ms_ticket_manager.dto.mapper.TicketMapper;
+import com.PedroPetterini.ms_ticket_manager.exception.EventNotFoundException;
 import com.PedroPetterini.ms_ticket_manager.model.Event;
 import com.PedroPetterini.ms_ticket_manager.model.Ticket;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,10 +21,13 @@ public class EventService {
     private final EventConsumer eventConsumer;
 
     public TicketResponseDto toDto(Ticket ticket) {
-        Event event = eventConsumer.getEvent(ticket.getEventId());
-        TicketResponseDto ticketResponseDto = ticketMapper.toDto(ticket);
-        ticketResponseDto.setEvent(event);
-        return ticketResponseDto;
+        if(eventConsumer.getEventResponse(ticket.getEventId()).status() != HttpStatus.NOT_FOUND.value()) {
+            Event event = eventConsumer.getEvent(ticket.getEventId());
+            TicketResponseDto ticketResponseDto = ticketMapper.toDto(ticket);
+            ticketResponseDto.setEvent(event);
+            return ticketResponseDto;
+        }
+        throw new EventNotFoundException("Event not found");
     }
 
     public List<TicketResponseDto> toDto(List<Ticket> tickets) {

@@ -6,10 +6,6 @@ import java.util.List;
 
 public record ErrorResponseDto(int status, String message, List<ErrorField> errors) {
 
-    public static ErrorResponseDto defaultResponse(String message) {
-        return new ErrorResponseDto(HttpStatus.BAD_REQUEST.value(), message, List.of());
-    }
-
     public static ErrorResponseDto conflictResponse(String message) {
         return new ErrorResponseDto(HttpStatus.CONFLICT.value(), message, List.of());
     }

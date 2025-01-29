@@ -70,6 +70,9 @@ public class TicketController {
         } catch (TicketNotFoundException e) {
             var errorMessage = ErrorResponseDto.ticketNotFoundResponse(e.getMessage());
             return ResponseEntity.status(errorMessage.status()).body(errorMessage);
+        }catch (EventNotFoundException e) {
+            var errorMessage = ErrorResponseDto.eventNotFoundResponse(e.getMessage());
+            return ResponseEntity.status(errorMessage.status()).body(errorMessage);
         }
     }
 

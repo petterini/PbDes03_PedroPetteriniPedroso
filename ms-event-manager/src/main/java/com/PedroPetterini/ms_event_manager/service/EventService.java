@@ -35,10 +35,8 @@ public class EventService {
     }
 
     public Event getEventById(String id) {
-        if (eventRepository.existsById(id)) {
-            return eventRepository.findById(id).orElse(null);
-        }
-        throw new EventNotFoundException("Inexistent event");
+        return eventRepository.findById(id)
+                .orElseThrow(() -> new EventNotFoundException("Inexistent event"));
     }
 
     public Event addEvent(EventDto eventDto) {
