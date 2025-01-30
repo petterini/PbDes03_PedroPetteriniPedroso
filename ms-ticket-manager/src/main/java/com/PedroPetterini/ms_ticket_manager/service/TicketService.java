@@ -8,7 +8,6 @@ import com.PedroPetterini.ms_ticket_manager.model.Email;
 import com.PedroPetterini.ms_ticket_manager.model.Event;
 import com.PedroPetterini.ms_ticket_manager.model.Ticket;
 import com.PedroPetterini.ms_ticket_manager.repository.TicketRepository;
-import feign.Response;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

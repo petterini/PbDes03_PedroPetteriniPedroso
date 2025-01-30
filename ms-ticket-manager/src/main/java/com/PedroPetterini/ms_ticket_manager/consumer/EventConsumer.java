@@ -1,12 +1,10 @@
 package com.PedroPetterini.ms_ticket_manager.consumer;
 
 import com.PedroPetterini.ms_ticket_manager.model.Event;
-import com.PedroPetterini.ms_ticket_manager.model.Ticket;
 import feign.Response;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestParam;
 
 @FeignClient(value = "event-consumer",
         url="http://localhost:8080/eventManagement/v1/")
