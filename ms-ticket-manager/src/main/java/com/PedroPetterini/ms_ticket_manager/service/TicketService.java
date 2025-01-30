@@ -1,9 +1,7 @@
 package com.PedroPetterini.ms_ticket_manager.service;
 
-import com.PedroPetterini.ms_ticket_manager.consumer.EmailConsumer;
 import com.PedroPetterini.ms_ticket_manager.consumer.EventConsumer;
 import com.PedroPetterini.ms_ticket_manager.dto.TicketResponseDto;
-import com.PedroPetterini.ms_ticket_manager.dto.mapper.TicketMapper;
 import com.PedroPetterini.ms_ticket_manager.exception.EventNotFoundException;
 import com.PedroPetterini.ms_ticket_manager.exception.TicketNotFoundException;
 import com.PedroPetterini.ms_ticket_manager.model.Email;
