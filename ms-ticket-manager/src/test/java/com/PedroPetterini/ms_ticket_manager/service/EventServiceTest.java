@@ -37,7 +37,7 @@ class EventServiceTest {
     @Test
     void toDtoWithValidEventId() {
         Ticket ticket = new Ticket("1", "João Silva", "41556135068", "joao.silva@email.com", "E001", "Concerto de Rock", 100.0, 20.0, true);
-        Event event = new Event("E001", "Concerto de Rock", LocalDateTime.now(), "97450-000", "João Broll","Centro", "Cacequi", "RS");
+        Event event = new Event("E001", "Concerto de Rock", LocalDateTime.now(), "97450-000", "João Broll", "Centro", "Cacequi", "RS");
         TicketResponseDto ticketResponseDtoMock = new TicketResponseDto("1", "João Silva", "41556135068", "joao.silva@email.com", event, 100.0, 20.0);
 
         when(eventConsumer.getEventResponse(ticket.getEventId())).thenReturn(mockResponse(HttpStatus.OK.value()));
@@ -55,27 +55,52 @@ class EventServiceTest {
     }
 
     @Test
-    void toDtoWithInvalidEventId() {
+    void toDtoWithValidEventName() {
+        Ticket ticket = new Ticket("1", "João Silva", "41556135068", "joao.silva@email.com", "E001", "Concerto de Rock", 100.0, 20.0, true);
+        Event event = new Event("E001", "Concerto de Rock", LocalDateTime.now(), "97450-000", "João Broll", "Centro", "Cacequi", "RS");
+        TicketResponseDto ticketResponseDtoMock = new TicketResponseDto("1", "João Silva", "41556135068", "joao.silva@email.com", event, 100.0, 20.0);
+
+        when(eventConsumer.getEventResponse(ticket.getEventId())).thenReturn(mockResponse(HttpStatus.NOT_FOUND.value()));
+        when(eventConsumer.getEventResponseByName(ticket.getEventName())).thenReturn(mockResponse(HttpStatus.OK.value()));
+        when(eventConsumer.getEventByName(ticket.getEventName())).thenReturn(event);
+        when(ticketMapper.toDto(ticket)).thenReturn(ticketResponseDtoMock);
+
+        TicketResponseDto result = eventService.toDto(ticket);
+
+        assertNotNull(result);
+        assertEquals(event, result.getEvent());
+        assertEquals(ticket.getEventName(), result.getEvent().getEventName());
+        verify(eventConsumer, times(1)).getEventResponse(ticket.getEventId());
+        verify(eventConsumer, times(1)).getEventResponseByName(ticket.getEventName());
+        verify(eventConsumer, times(1)).getEventByName(ticket.getEventName());
+        verify(ticketMapper, times(1)).toDto(ticket);
+    }
+
+    @Test
+    void toDtoWithInvalidEventIdAndName() {
         Ticket ticket = new Ticket("1", "João Silva", "41556135068", "joao.silva@email.com", "E001", "Concerto de Rock", 100.0, 20.0, true);
 
         when(eventConsumer.getEventResponse(ticket.getEventId())).thenReturn(mockResponse(HttpStatus.NOT_FOUND.value()));
+        when(eventConsumer.getEventResponseByName(ticket.getEventName())).thenReturn(mockResponse(HttpStatus.NOT_FOUND.value()));
 
         assertThrows(EventNotFoundException.class, () -> eventService.toDto(ticket));
         verify(eventConsumer, times(1)).getEventResponse(ticket.getEventId());
+        verify(eventConsumer, times(1)).getEventResponseByName(ticket.getEventName());
         verify(eventConsumer, never()).getEvent(anyString());
+        verify(eventConsumer, never()).getEventByName(anyString());
         verify(ticketMapper, never()).toDto(any(Ticket.class));
     }
 
     @Test
-    void toDtoListWithValidEventId() {
+    void toDtoListWithValidEventIdsAndNames() {
         Ticket ticket1 = new Ticket("1", "João Silva", "41556135068", "joao.silva@email.com", "E001", "Concerto de Rock", 100.0, 20.0, true);
         Ticket ticket2 = new Ticket("2", "Maria Oliveira", "43652783042", "maria.oliveira@email.com", "E002", "Teatro Musical", 150.0, 30.0, true);
 
-        Event event1 = new Event("E001", "Concerto de Rock", LocalDateTime.now(), "97450-000", "João Broll","Centro", "Cacequi", "RS");
-        Event event2 = new Event("E002", "Concerto de Rock 2", LocalDateTime.now(), "97450-000", "João Broll","Centro", "Cacequi", "RS");
+        Event event1 = new Event("E001", "Concerto de Rock", LocalDateTime.now(), "97450-000", "João Broll", "Centro", "Cacequi", "RS");
+        Event event2 = new Event("E002", "Teatro Musical", LocalDateTime.now(), "97450-000", "Ana Lopes", "Centro", "Cacequi", "RS");
 
         TicketResponseDto responseDto1 = new TicketResponseDto("1", "João Silva", "41556135068", "joao.silva@email.com", event1, 100.0, 20.0);
-        TicketResponseDto responseDto2 = new TicketResponseDto("2", "João Silva", "41556135068", "joao.silva@email.com", event2, 100.0, 20.0);
+        TicketResponseDto responseDto2 = new TicketResponseDto("2", "Maria Oliveira", "43652783042", "maria.oliveira@email.com", event2, 150.0, 30.0);
 
         List<Ticket> tickets = List.of(ticket1, ticket2);
 
@@ -90,7 +115,6 @@ class EventServiceTest {
         assertEquals(2, result.size());
         assertEquals(event1, result.get(0).getEvent());
         assertEquals(event2, result.get(1).getEvent());
-
         verify(eventConsumer, times(1)).getEvent(ticket1.getEventId());
         verify(eventConsumer, times(1)).getEvent(ticket2.getEventId());
         verify(ticketMapper, times(1)).toDto(ticket1);
@@ -106,6 +130,7 @@ class EventServiceTest {
         verify(eventConsumer, never()).getEvent(anyString());
         verify(ticketMapper, never()).toDto(any(Ticket.class));
     }
+
 
     private feign.Response mockResponse(int status) {
         return feign.Response.builder()

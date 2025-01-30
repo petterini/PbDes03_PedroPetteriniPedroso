@@ -45,6 +45,17 @@ public class EventController {
         }
     }
 
+    @GetMapping("/get-by-name/{eventName}")
+    public ResponseEntity<Object> getEventByEventName(@PathVariable String eventName) {
+        try{
+            Event event = this.eventService.getEventByName(eventName);
+            return ResponseEntity.ok(event);
+        }catch (EventNotFoundException e){
+            var errorMessage = ErrorResponseDto.eventNotFoundResponse(e.getMessage());
+            return ResponseEntity.status(errorMessage.status()).body(errorMessage);
+        }
+    }
+
     @PostMapping
     public ResponseEntity<Object> addEvent(@Valid @RequestBody EventDto eventDto) {
         try {

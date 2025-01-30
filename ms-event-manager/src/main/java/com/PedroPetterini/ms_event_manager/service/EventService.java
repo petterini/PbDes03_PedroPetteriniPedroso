@@ -85,5 +85,10 @@ public class EventService {
     }
 
 
+    public Event getEventByName(String eventName) {
+            return eventRepository.findByEventName(eventName).orElseThrow(
+                    () -> new EventNotFoundException("Inexistent event")
+            );
+    }
 }
 

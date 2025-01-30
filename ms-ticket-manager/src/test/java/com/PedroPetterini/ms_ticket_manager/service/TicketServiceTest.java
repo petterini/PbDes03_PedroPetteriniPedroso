@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.*;
 import org.springframework.http.HttpStatus;
 
+import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
@@ -51,6 +52,7 @@ class TicketServiceTest {
     @Test
     void createTicketWithValidEventId() {
         Ticket ticket1 = new Ticket("1", "João Silva", "41556135068", "joao.silva@email.com", "E001", "Concerto de Rock", 100.0, 20.0, true);
+        Event event1 = new Event("E001", "Concerto de Rock", LocalDateTime.now(), "97450-000", "João Broll", "Centro", "Cacequi", "RS");
 
         Response feignResponse = Response.builder()
                 .status(HttpStatus.OK.value())
@@ -58,6 +60,7 @@ class TicketServiceTest {
                 .build();
 
         when(eventConsumer.getEventResponse(ticket1.getEventId())).thenReturn(feignResponse);
+        when(eventConsumer.getEvent(ticket1.getEventId())).thenReturn(event1);
         when(ticketRepository.save(ticket1)).thenReturn(ticket1);
         doNothing().when(emailService).sendEmail(any(Email.class));
 
@@ -80,24 +83,77 @@ class TicketServiceTest {
     }
 
     @Test
-    void createTicketWithInvalidEventId() {
-        Ticket t1 = new Ticket();
-        t1.setEventId("invalidEventId");
+    void createTicketWithInvalidEventIdAndValidEventName() {
+        Ticket ticket1 = new Ticket("1", "João Silva", "41556135068", "joao.silva@email.com", "E001", "Concerto de Rock", 100.0, 20.0, true);
+        Event event1 = new Event("E001", "Concerto de Rock", LocalDateTime.now(), "97450-000", "João Broll", "Centro", "Cacequi", "RS");
 
-        Response feignResponse = Response.builder()
+        Response feignResponse1 = Response.builder()
                 .status(HttpStatus.NOT_FOUND.value())
                 .request(Request.create(Request.HttpMethod.GET, "", Map.of(), null, null, null))
                 .build();
-        when(eventConsumer.getEventResponse(t1.getEventId())).thenReturn(feignResponse);
+
+        Response feignResponse2 = Response.builder()
+                .status(HttpStatus.OK.value())
+                .request(Request.create(Request.HttpMethod.GET, "", Map.of(), null, null, null))
+                .build();
+
+        when(eventConsumer.getEventResponse(ticket1.getEventId())).thenReturn(feignResponse1);
+        when(eventConsumer.getEventResponseByName(ticket1.getEventName())).thenReturn(feignResponse2);
+        when(eventConsumer.getEventByName(ticket1.getEventName())).thenReturn(event1);
+        when(ticketRepository.save(any(Ticket.class))).thenReturn(ticket1);
+        doNothing().when(emailService).sendEmail(any(Email.class));
+
+        Ticket ticket = ticketService.createTicket(ticket1);
+
+        assertThat(ticket).isEqualTo(ticket1);
+        verify(eventConsumer).getEventResponse(ticket1.getEventId());
+        verify(eventConsumer).getEventResponseByName(ticket1.getEventName());
+        verify(eventConsumer).getEventByName(ticket1.getEventName());
+
+        InOrder inOrder = Mockito.inOrder(emailService, ticketRepository);
+        inOrder.verify(emailService).sendEmail(any(Email.class));
+        inOrder.verify(ticketRepository).save(ticket);
+
+        ArgumentCaptor<Email> emailCaptor = ArgumentCaptor.forClass(Email.class);
+        verify(emailService).sendEmail(emailCaptor.capture());
+        Email sentEmail = emailCaptor.getValue();
+
+        assertThat(sentEmail.getEmailTo()).isEqualTo("joao.silva@email.com");
+        assertThat(sentEmail.getSubject()).isEqualTo("Ticket Confirmation from: Concerto de Rock");
+        assertThat(sentEmail.getBody()).isEqualTo("Hello, João Silva, ticket Confirmation from: Concerto de Rock");
+    }
+
+
+    @Test
+    void createTicketWithInvalidEventIdAndInvalidEventName() {
+        Ticket t1 = new Ticket();
+        t1.setEventId("invalidEventId");
+        t1.setEventName("invalidEventName");
+
+        Response feignResponseId = Response.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .request(Request.create(Request.HttpMethod.GET, "", Map.of(), null, null, null))
+                .build();
+
+        Response feignResponseName = Response.builder()
+                .status(HttpStatus.NOT_FOUND.value())
+                .request(Request.create(Request.HttpMethod.GET, "", Map.of(), null, null, null))
+                .build();
+
+        when(eventConsumer.getEventResponse(t1.getEventId())).thenReturn(feignResponseId);
+        when(eventConsumer.getEventResponseByName(t1.getEventName())).thenReturn(feignResponseName);
 
         EventNotFoundException exception = assertThrows(EventNotFoundException.class,
                 () -> ticketService.createTicket(t1));
 
         assertEquals("Error creating ticket, event not found", exception.getMessage());
 
+        verify(eventConsumer).getEventResponse(t1.getEventId());
+        verify(eventConsumer).getEventResponseByName(t1.getEventName());
         verify(ticketRepository, never()).save(any());
         verify(emailService, never()).sendEmail(any(Email.class));
     }
+
 
     @Test
     void getAllTickets() {

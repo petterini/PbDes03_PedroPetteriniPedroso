@@ -11,4 +11,6 @@ import java.util.Optional;
 public interface EventRepository extends MongoRepository<Event, String> {
 
     Optional<Event> findByEventNameAndDateTimeAndCep(String eventName, LocalDateTime dateTime, String cep);
+
+    Optional<Event> findByEventName(String eventName);
 }

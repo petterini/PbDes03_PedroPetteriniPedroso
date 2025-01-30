@@ -5,6 +5,7 @@ import com.PedroPetterini.ms_ticket_manager.dto.TicketResponseDto;
 import com.PedroPetterini.ms_ticket_manager.exception.EventNotFoundException;
 import com.PedroPetterini.ms_ticket_manager.exception.TicketNotFoundException;
 import com.PedroPetterini.ms_ticket_manager.model.Email;
+import com.PedroPetterini.ms_ticket_manager.model.Event;
 import com.PedroPetterini.ms_ticket_manager.model.Ticket;
 import com.PedroPetterini.ms_ticket_manager.repository.TicketRepository;
 import feign.Response;
@@ -23,14 +24,27 @@ public class TicketService {
 
 
     public Ticket createTicket(Ticket ticket) {
-        Response response = eventConsumer.getEventResponse(ticket.getEventId());
-        if (response.status() == 200) {
+        Event event = null;
+
+        if (eventConsumer.getEventResponse(ticket.getEventId()).status() == 200) {
+            event = eventConsumer.getEvent(ticket.getEventId());
+        }
+
+        if (event == null && eventConsumer.getEventResponseByName(ticket.getEventName()).status() == 200) {
+            event = eventConsumer.getEventByName(ticket.getEventName());
+        }
+
+        if (event != null) {
+            ticket.setEventId(event.getId());
+            ticket.setEventName(event.getEventName());
+
             sendMailTicketConfirmation(ticket);
             return ticketRepository.save(ticket);
         } else {
             throw new EventNotFoundException("Error creating ticket, event not found");
         }
     }
+
 
 
     public List<TicketResponseDto> getAllTickets() {
@@ -50,7 +64,7 @@ public class TicketService {
             Ticket ticket = ticketRepository.findById(ticketId).orElse(null);
             ticket.setActive(false);
             ticketRepository.save(ticket);
-        }else {
+        } else {
             throw new TicketNotFoundException("Ticket not found");
         }
     }
@@ -64,7 +78,7 @@ public class TicketService {
     }
 
     public TicketResponseDto updateTicket(String id, Ticket ticket) {
-        if(ticketRepository.existsById(id)) {
+        if (ticketRepository.existsById(id)) {
             Ticket ticketToUpdate = ticketRepository.findById(id).get();
             updateData(ticketToUpdate, ticket);
             ticketRepository.save(ticketToUpdate);

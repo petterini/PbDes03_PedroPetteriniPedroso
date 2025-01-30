@@ -21,13 +21,25 @@ public class EventService {
     private final EventConsumer eventConsumer;
 
     public TicketResponseDto toDto(Ticket ticket) {
-        if(eventConsumer.getEventResponse(ticket.getEventId()).status() != HttpStatus.NOT_FOUND.value()) {
-            Event event = eventConsumer.getEvent(ticket.getEventId());
+        Event event = null;
+
+        if (eventConsumer.getEventResponse(ticket.getEventId()).status() != HttpStatus.NOT_FOUND.value()) {
+            event = eventConsumer.getEvent(ticket.getEventId());
+        }
+
+        if (event == null && eventConsumer.getEventResponseByName(ticket.getEventName()).status() != HttpStatus.NOT_FOUND.value()) {
+            event = eventConsumer.getEventByName(ticket.getEventName());
+        }
+
+        if (event != null) {
+            ticket.setEventName(event.getEventName());
+            ticket.setEventId(event.getId());
             TicketResponseDto ticketResponseDto = ticketMapper.toDto(ticket);
             ticketResponseDto.setEvent(event);
             return ticketResponseDto;
+        } else {
+            throw new EventNotFoundException("Event not found");
         }
-        throw new EventNotFoundException("Event not found");
     }
 
     public List<TicketResponseDto> toDto(List<Ticket> tickets) {
