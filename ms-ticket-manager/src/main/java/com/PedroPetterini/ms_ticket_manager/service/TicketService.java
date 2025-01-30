@@ -39,6 +39,7 @@ public class TicketService {
             ticket.setEventName(event.getEventName());
 
             sendMailTicketConfirmation(ticket);
+            ticket.setTicketId(ticketRepository.count() + 1 + "");
             return ticketRepository.save(ticket);
         } else {
             throw new EventNotFoundException("Error creating ticket, event not found");

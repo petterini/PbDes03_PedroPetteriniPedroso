@@ -63,6 +63,7 @@ class TicketServiceTest {
         when(eventConsumer.getEvent(ticket1.getEventId())).thenReturn(event1);
         when(ticketRepository.save(ticket1)).thenReturn(ticket1);
         doNothing().when(emailService).sendEmail(any(Email.class));
+        when(ticketRepository.count()).thenReturn(0L);
 
         Ticket ticket = ticketService.createTicket(ticket1);
 
@@ -102,6 +103,7 @@ class TicketServiceTest {
         when(eventConsumer.getEventByName(ticket1.getEventName())).thenReturn(event1);
         when(ticketRepository.save(any(Ticket.class))).thenReturn(ticket1);
         doNothing().when(emailService).sendEmail(any(Email.class));
+        when(ticketRepository.count()).thenReturn(0L);
 
         Ticket ticket = ticketService.createTicket(ticket1);
 
