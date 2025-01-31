@@ -25,6 +25,9 @@ public class TicketService {
     public Ticket createTicket(Ticket ticket) {
         Event event = null;
 
+        System.out.println(eventConsumer.getEventResponse(ticket.getEventId()).status());
+        System.out.println(eventConsumer.getEventResponseByName(ticket.getEventName()).status());
+
         if (eventConsumer.getEventResponse(ticket.getEventId()).status() == 200) {
             event = eventConsumer.getEvent(ticket.getEventId());
         }
