@@ -1,0 +1,53 @@
+services:
+  # Banco de Dados MongoDB
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    ports:
+      - "27017:27017"
+    networks:
+      - api-network
+    volumes:
+      - mongodb-data:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+
+  # Microsserviço de Eventos
+  ms-event-manager:
+    container_name: ms-event-manager
+    build: ./ms-event-manager
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - api-network
+    depends_on:
+      - mongodb
+    ports:
+      - "${MS_EVENT_MANAGER_PORT}:8082"
+    environment:
+      - MONGO_URI=${MONGO_URI}/db_event?authSource=admin
+
+  # Microsserviço de Ingressos
+  ms-ticket-manager:
+    container_name: ms-ticket-manager
+    build: ./ms-ticket-manager
+    restart: unless-stopped
+    env_file:
+      - .env
+    networks:
+      - api-network
+    depends_on:
+      - mongodb
+    ports:
+      - "${MS_TICKET_MANAGER_PORT}:8081"
+    environment:
+      - MONGO_URI=${MONGO_URI}/db_ticket?authSource=admin
+
+networks:
+  api-network:
+    driver: bridge
+
+volumes:
+  mongodb-data:
