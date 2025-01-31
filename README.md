@@ -10,5 +10,9 @@ O desafio implementa 2 microsserviços para gerenciamento de eventos e tickets.
 
 ## Execução
 
-Para executar cada microsserviço, o passo a passo está indicado no README de cada um.
+Para executar os serviços de forma plena, deve-se executá-los através do docker na pasta raíz do projeto(atual), com o comando:
+
+```
+docker-compose up --build
+```
 
