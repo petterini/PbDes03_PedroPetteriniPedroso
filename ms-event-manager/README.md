@@ -80,7 +80,3 @@ Content-Type: application/json
   "cep": "91790-017"  
 }  
 ```
-
-## Cobertura de testes
-
-![Cobertura de testes](test-coverage.png)
