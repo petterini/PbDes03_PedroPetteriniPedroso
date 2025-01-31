@@ -81,6 +81,3 @@ Content-Type: application/json
 
 ```
 
-## Cobertura de testes
-
-![Cobertura de testes](test-coverage.png)
