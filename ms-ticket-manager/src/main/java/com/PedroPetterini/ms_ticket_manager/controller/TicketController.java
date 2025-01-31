@@ -23,7 +23,7 @@ public class TicketController {
     private final TicketService ticketService;
     private final EventService eventService;
 
-    @PostMapping
+    @PostMapping("/create-ticket")
     public ResponseEntity<Object> createTicket(@Valid @RequestBody Ticket ticket) {
         try {
             ticketService.createTicket(ticket);
@@ -41,7 +41,7 @@ public class TicketController {
         return ResponseEntity.ok(ticketService.getAllTickets());
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get-ticket/{id}")
     public ResponseEntity<Object> getTicketById(@PathVariable("id") String id) {
         try {
             return ResponseEntity.ok(ticketService.getTicketById(id));
@@ -51,7 +51,7 @@ public class TicketController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/cancel-ticket/{id}")
     public ResponseEntity<Object> deleteTicketById(@PathVariable("id") String id) {
         try {
             ticketService.softDeleteTicketById(id);
@@ -62,7 +62,7 @@ public class TicketController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update-ticket/{id}")
     public ResponseEntity<Object> updateTicketById(@PathVariable("id") String id, @Valid @RequestBody Ticket ticket) {
         try {
             return ResponseEntity.ok(ticketService.updateTicket(id, ticket));
