@@ -9,13 +9,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 @FeignClient(name = "event-manager", url = "${event.manager.url}")
 public interface EventConsumer {
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/get-event/{id}")
     Response getEventResponse(@PathVariable String id);
 
     @GetMapping(value = "/get-by-name/{eventName}")
     Response getEventResponseByName(@PathVariable String eventName);
 
-    @GetMapping(value = "/{id}")
+    @GetMapping(value = "/get-event/{id}")
     Event getEvent(@PathVariable String id);
 
     @GetMapping(value = "/get-by-name/{eventName}")

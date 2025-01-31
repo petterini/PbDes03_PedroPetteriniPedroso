@@ -34,7 +34,7 @@ public class EventController {
         return ResponseEntity.ok(events);
     }
 
-    @GetMapping("/{id}")
+    @GetMapping("/get-event/{id}")
     public ResponseEntity<Object> getEventById(@PathVariable String id) {
         try {
             Event event = this.eventService.getEventById(id);
@@ -56,7 +56,7 @@ public class EventController {
         }
     }
 
-    @PostMapping
+    @PostMapping("/create-event")
     public ResponseEntity<Object> addEvent(@Valid @RequestBody EventDto eventDto) {
         try {
             var newEvent = this.eventService.addEvent(eventDto);
@@ -67,7 +67,7 @@ public class EventController {
         }
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/update-event/{id}")
     public ResponseEntity<Object> updateEvent(@PathVariable String id, @Valid @RequestBody EventDto eventDto) {
         try {
             var e = this.eventService.updateEvent(id, eventDto);
@@ -81,7 +81,7 @@ public class EventController {
         }
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/delete-event/{id}")
     public ResponseEntity<Object> deleteEvent(@PathVariable String id) {
         try {
             this.eventService.deleteEvent(id);
